@@ -98,3 +98,15 @@ uptake %>%
   geom_line(aes(x = Q, y = Coverage, colour = Cohort))
 
 
+uptake %>% 
+  filter(Q == 1) %>% 
+  ggplot() +
+  geom_bar(aes(x = Cohort, y = Coverage), stat = "identity") +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+
+
+save(uptake, file = here::here("data", "uptake.rdata"))
+write_csv(uptake, file = here::here("data", "uptake.csv"))
+
+
+
