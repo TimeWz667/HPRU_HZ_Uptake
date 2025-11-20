@@ -5,38 +5,6 @@ library(simpleboot)
 load(file = here::here("data", "uptake.rdata"))
 
 
-lm.boot(fit, 100)
-uptake
-
-
-fit <- lm(log(1 - Coverage) ~ (Q - 1) + Cohort, data = uptake)
-
-
-1 - exp(coef(fit)['Q'])
-
-
-p_est <- coef(summary(fit))["Q", 1:2]
-
-p_hat <- 1 - exp(p_est[1])
-
-pini <- 0.2
-pcat <- p_hat
-
-
-
-ava <- rep(1 / 4, 4)
-ava
-
-
-ava1 <- ava * (1 - c(pini, 0, 0, 0)) * (1 - c(pcat, pini, 0, 0)) * (1 - c(pcat, pcat, pini, 0)) * (1 - c(pcat, pcat, pcat, pini)) 
-ava1 <- 1 - sum(ava1)
-
-
-ava2 <- 1 - (1 - pini) * (1 - pcat) ** 3
-
-
-ava1;ava2
-
 
 
 uptake %>% 
@@ -85,7 +53,17 @@ uptake %>%
   geom_point(aes(x = Q0, y = odd, colour = Year)) +
   facet_wrap(.~Age0)
  
-
+uptake %>% 
+  extract(Cohort, c("Year", "Q0", "Age0"), "(\\S+)_Q(1|2|3|4)_(65|70)") %>% 
+  filter(Q == 1) %>% 
+  mutate(odd = log(Coverage / (1 - Coverage))) %>% 
+  ggplot() +
+  geom_point(aes(x = Q0, y = Coverage, colour = Age0)) +
+  facet_wrap(.~Year) +
+  scale_y_continuous("Coverage (first eligible q)", labels = scales::percent) +
+  scale_x_discrete("Quarter (based on academic year)") + 
+  expand_limits(y = 0) +
+  theme_bw()
 
 
 
