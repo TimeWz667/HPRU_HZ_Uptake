@@ -101,12 +101,26 @@ ces %>%
   mutate(Thres = (dQ_All_d * 2e4 + dC_Med_d) / dN_VacRZV) %>% 
   filter(Arm == "RZV_2d") %>% 
   ggplot() +
-  geom_point(aes(x = dQ_All_d, y =  + dC_Med_d + 114 * dN_VacRZV, colour = Sc)) +
+  geom_point(aes(x = dQ_All_d, y =  + dC_Med_d + 113 * dN_VacRZV, colour = Sc)) +
   geom_abline(slope = 2e4) +
   scale_x_continuous("Difference in QALY (per 1 M)", labels = scales::number_format(scale = 1e6)) +
-  scale_y_continuous("Difference in Cost (M GBP, per 1 M, 114GBP per dose)", labels = scales::number_format(scale = 1e6 * 1e-6)) +
-  facet_grid(.~AgeStart) +
-  expand_limits(y = 0, x = 0)
+  scale_y_continuous("Difference in Cost (M GBP, per 1 M, 113 GBP per dose)", labels = scales::number_format(scale = 1e6 * 1e-6)) +
+  facet_grid(AgeStart~.) +
+  scale_colour_discrete("Uptake scenario", labels = c(S1 = "ZVL uptake rates", S2 = "RZV uptake rates")) +
+  expand_limits(y = 0, x = 0) +
+  theme_bw()
+
+
+
+ces %>% 
+  filter(Index %in% c("dN_VacRZV", "dC_Med_d", "dQ_All_d")) %>% 
+  select(AgeStart, Sc, Arm, M, Index) %>% 
+  pivot_wider(names_from = Index, values_from = M) %>% 
+  mutate(Thres = (dQ_All_d * 2e4 + dC_Med_d) / dN_VacRZV, MNB = dQ_All_d * 2e4  + dC_Med_d - dN_VacRZV * 113) %>% 
+  ggplot() +
+  geom_point(aes(x = AgeStart, y = MNB, colour = Sc)) +
+  geom_hline(yintercept = 0) +
+  facet_grid(.~Arm)
  
 
 stats_uv %>% 
