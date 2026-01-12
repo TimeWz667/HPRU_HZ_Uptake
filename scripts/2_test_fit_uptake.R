@@ -89,15 +89,27 @@ pred_p0 <- bind_cols(
     p0_u = 1 / (1 + exp(-upr))
   )
 
-pred_p0 %>% 
+g_fitted <- pred_p0 %>% 
   crossing(Q0 = 1:4) %>% 
+  mutate(Year = paste("Cohort", Year)) %>% 
   ggplot() + 
   geom_ribbon(aes(x = Q0, ymin = p0_l, ymax = p0_u, fill = Age0), alpha = 0.4) + 
   geom_line(aes(x = Q0, y = p0, colour = Age0)) +
-  geom_point(data = dat_p0, aes(x = as.numeric(Q0), y = Coverage, shape = Age0)) +
+  geom_point(data = dat_p0 %>% 
+               mutate(Year = paste("Cohort", Year)), aes(x = as.numeric(Q0), y = Coverage, shape = Age0)) +
   facet_grid(.~Year) +
-  expand_limits(y = c(0, 0.5))
+  expand_limits(y = c(0, 0.5)) +
+  scale_y_continuous("Coverage (first eligible quarter)", labels = scales::percent) +
+  scale_x_discrete("Quarter (based on academic year)") +
+  scale_fill_discrete("Eligible from") +
+  scale_shape_discrete("Eligible from") + 
+  scale_colour_discrete("Eligible from") +
+  theme_bw() +
+  theme(legend.position = "bottom")
 
+g_fitted
+
+ggsave(g_fitted, filename = here::here("outputs", "fitted_p0.pdf"), width = 8, height = 3.5)
 
 
 ## Model pc
@@ -153,7 +165,12 @@ sims_p0 <- bind_cols(
   select(Key, Year, Age0, p_ini)
 
 
-sims_p0
+sims_p0 %>% 
+  group_by(Year, Age0) %>% 
+  summarise(p_ini = mean(p_ini))
+
+sims_pc %>% 
+  summarise(p_catch = mean(p_catch))
 
 
 
